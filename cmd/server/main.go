@@ -18,19 +18,20 @@ type Application struct {
 }
 
 func (app *Application) Serve() error {
-	// port := os.Getenv("PORT")
 	fmt.Println("API is listening on port", app.Config.Port)
 
 	srv := &http.Server {
 		Addr: fmt.Sprintf(":%s", app.Config.Port),
 		// TODO: add router
 	}
+	
+	// http.Server.ListenAndServe() returns an error
 	return srv.ListenAndServe()
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil { 
+	// loading .env vars
+	if err := godotenv.Load(); err != nil { 
 		log.Fatal("Error loading .env")
 	}
 
@@ -44,8 +45,8 @@ func main() {
 		Config: cfg,
 	}
 
-	err = app.Serve()
-	if err != nil {
+	// starting server
+	if err := app.Serve(); err != nil {
 		log.Fatal(err)
 	}
 }
