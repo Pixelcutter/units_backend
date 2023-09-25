@@ -33,8 +33,16 @@ func main() {
 
 	server.GET("/users", func(ctx *gin.Context) {
 		ctx.JSON(
-			http.StatusAccepted,
+			http.StatusOK,
 			userController.FetchAllUsers(),
+		)
+	})
+
+	server.GET("/users/:name", func(ctx *gin.Context){
+		ctx.String(
+			http.StatusOK, 
+			"hello, %s", 
+			ctx.Param("name"),
 		)
 	})
 
@@ -47,7 +55,7 @@ func main() {
 
 	server.GET("/items", func(ctx *gin.Context) {
 		ctx.JSON(
-			http.StatusAccepted,
+			http.StatusOK,
 			itemController.FetchAllItems(),
 		)
 	})
