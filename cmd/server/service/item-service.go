@@ -1,6 +1,9 @@
 package service
 
-import "github.com/Pixelcutter/units_backend/cmd/server/model"
+import (
+	"github.com/Pixelcutter/units_backend/cmd/server/model"
+	"github.com/Pixelcutter/units_backend/cmd/server/repository"
+)
 
 type ItemService interface {
 	SaveItem(model.Item) model.TestItem
@@ -9,6 +12,7 @@ type ItemService interface {
 
 type itemService struct {
 	items []model.Item
+	repository repository.UnitsRepository
 }
 
 func (service *itemService) SaveItem(item model.Item) model.TestItem {
@@ -25,6 +29,8 @@ func (service *itemService) FetchAllItems() []model.Item {
 	return service.items
 }
 
-func NewItemService() ItemService {
-	return &itemService{}
+func NewItemService(repository repository.UnitsRepository) ItemService {
+	return &itemService{
+		repository: repository,
+	}
 }
