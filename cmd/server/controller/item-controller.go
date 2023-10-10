@@ -8,7 +8,7 @@ import (
 
 type ItemController interface {
 	FetchAllItems() []model.Item
-	SaveItem(ctx *gin.Context) model.TestItem
+	SaveItem(ctx *gin.Context) model.Item
 }
 
 type item_controller struct {
@@ -19,8 +19,8 @@ func (c *item_controller) FetchAllItems() []model.Item {
 	return c.service.FetchAllItems()
 }
 
-func (c *item_controller) SaveItem(ctx *gin.Context) model.TestItem {
-	var item model.Item
+func (c *item_controller) SaveItem(ctx *gin.Context) model.Item {
+	var item model.NewItem
 	ctx.BindJSON(&item)
 	newItem := c.service.SaveItem(item)
 	return newItem

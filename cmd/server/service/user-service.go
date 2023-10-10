@@ -1,23 +1,29 @@
 package service
 
 import (
+	"log"
+
 	"github.com/Pixelcutter/units_backend/cmd/server/model"
 	"github.com/Pixelcutter/units_backend/cmd/server/repository"
 )
 
 type UserService interface {
-	SaveUser(model.User) model.User
+	SaveUser(model.UserDetails) model.User
 	FetchAllUsers() []model.User
 }
 
 type userService struct {
-	users []model.User
+	users      []model.User
 	repository repository.UnitsRepository
 }
 
-func (service *userService) SaveUser(user model.User) model.User {
-	service.users = append(service.users, user)
-	return user
+func (service *userService) SaveUser(user model.UserDetails) model.User {
+	newUser, err := service.repository.SaveUser(user)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return newUser
 }
 
 func (service *userService) FetchAllUsers() []model.User {

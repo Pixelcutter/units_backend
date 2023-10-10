@@ -1,13 +1,16 @@
 package model
 
+import "time"
+
 type Item struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          int       `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type TestItem struct {
-	Item Item
-	R1   string `json:"r1"`
-	R2   string `json:"r2"`
+type NewItem struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }

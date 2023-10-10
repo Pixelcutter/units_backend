@@ -20,10 +20,10 @@ func (c *user_controller) FetchAllUsers() []model.User {
 }
 
 func (c *user_controller) SaveUser(ctx *gin.Context) model.User {
-	var user model.User
+	var user model.UserDetails
 	ctx.BindJSON(&user)
-	c.service.SaveUser(user)
-	return user
+	newUser := c.service.SaveUser(user)
+	return newUser
 }
 
 func NewUserController(service service.UserService) UserController {

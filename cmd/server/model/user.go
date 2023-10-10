@@ -2,9 +2,15 @@ package model
 
 import "time"
 
+type UserDetails struct {
+	Email    string `json:"email"`
+	PassHash string `json:"pass_hash"`
+	Username string `json:"username"`
+}
+
 type User struct {
-	ID        int       `json:"id"`
-	Email     string    `json:"email"`
-	PassHash  string    `json:"pass_hash"`
-	LastLogin time.Time `json:"last_login"`
+	ID        int         `json:"id"`
+	Signup    time.Time   `json:"signup"`
+	LastLogin time.Time   `json:"last_login"`
+	Details   UserDetails `json:"details"`
 }
