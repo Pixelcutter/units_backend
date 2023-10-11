@@ -3,9 +3,7 @@ package repository
 import (
 	"context"
 	"log"
-	"math/rand"
 	"sync"
-	"time"
 
 	"github.com/Pixelcutter/units_backend/cmd/server/model"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -42,17 +40,14 @@ func NewPostgresRepo(dbPath string) UnitsRepository {
 }
 
 func (repository *postgresRepo) SaveUser(user model.UserDetails) (model.User, error) {
-	newUser := model.User{
-		ID:        rand.Intn(1000000000),
-		Signup:    time.Now(),
-		LastLogin: time.Now(),
-		Details:   user,
-	}
+	newUser := model.User{}
 
-	_, err := repository.db.Exec(context.Background(), `
-		INSERT INTO "user" (id, email, pass_hash, username, signup, last_login)
-		VALUES ($1, $2, $3, $4, $5, $6)
-	`, newUser.ID, user.Email, user.PassHash, user.Username, newUser.Signup, newUser.LastLogin)
+	// Insert into db and return new user
+	err := repository.db.QueryRow(context.Background(), `
+		INSERT INTO "user" (email, pass_hash, username)
+		VALUES ($1, $2, $3)
+		RETURNING id, email, username, signup, last_login
+	`, user.Email, user.PassHash, user.Username).Scan(&newUser.ID, &newUser.Email, &newUser.Username, &newUser.Signup, &newUser.LastLogin)
 	if err != nil {
 		return model.User{}, err
 	}

@@ -9,8 +9,9 @@ type UserDetails struct {
 }
 
 type User struct {
-	ID        int         `json:"id"`
-	Signup    time.Time   `json:"signup"`
-	LastLogin time.Time   `json:"last_login"`
-	Details   UserDetails `json:"details"`
+	ID        int       `json:"id"`
+	Signup    time.Time `json:"signup"`
+	LastLogin time.Time `json:"last_login"`
+	Email     string    `json:"email"`
+	Username  string    `json:"username"`
 }
