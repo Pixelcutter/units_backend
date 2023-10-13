@@ -36,27 +36,11 @@ func main() {
 	defer unitsRepo.CloseDB()
 	server := gin.Default()
 
-	server.GET("/users", func(ctx *gin.Context) {
-		ctx.JSON(
-			http.StatusOK,
-			userController.FetchAllUsers(),
-		)
-	})
-
-	server.GET("/users/:name", func(ctx *gin.Context){
-		ctx.String(
-			http.StatusOK, 
-			"hello, %s", 
-			ctx.Param("name"),
-		)
-	})
-
-	server.POST("/users", func(ctx *gin.Context) {
-		ctx.JSON(
-			http.StatusCreated,
-			userController.SaveUser(ctx),
-		)
-	})
+	users := server.Group("users")
+	{
+		users.POST("", userController.SaveUser)
+		users.GET("/:id", userController.FetchUser)
+	}
 
 	server.GET("/items", func(ctx *gin.Context) {
 		ctx.JSON(

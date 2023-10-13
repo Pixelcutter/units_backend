@@ -6,7 +6,7 @@ type UnitsRepository interface {
 	CloseDB()
 	SaveUser(model.UserDetails) (model.User, error)
 	FindAllUser() ([]model.User, error)
-	FindOneUser(int) (model.User, error)
+	FetchUser(int) (model.User, error)
 	UpdateUser(model.User) (model.User, error)
 	DeleteUser(int) error
 	SaveItem(model.NewItem) (model.Item, error)

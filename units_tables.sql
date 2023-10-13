@@ -3,21 +3,16 @@
 BEGIN;
 
 
-CREATE TABLE IF NOT EXISTS public.item
+CREATE TABLE IF NOT EXISTS public.category
 (
-    id serial NOT NULL,
-    sku character varying(255),
-    category_id integer DEFAULT 0,
-    item_name character varying(255) NOT NULL,
-    description text DEFAULT 'Component description goes here',
-    img_path character varying(255),
-    quantity real DEFAULT 0,
-    unit character varying(56),
-    price money DEFAULT 0,
-    cost money DEFAULT 0,
-    for_sale boolean DEFAULT true,
-    slug character varying(255) NOT NULL,
-    PRIMARY KEY (id)
+    id integer NOT NULL DEFAULT nextval('category_id_seq'::regclass),
+    category_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    description text COLLATE pg_catalog."default" DEFAULT 'Category description goes here'::text,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now(),
+    created_by integer NOT NULL,
+    updated_by integer NOT NULL,
+    CONSTRAINT category_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS public.component
@@ -27,54 +22,50 @@ CREATE TABLE IF NOT EXISTS public.component
     child_qty real
 );
 
-CREATE TABLE IF NOT EXISTS public."user"
+CREATE TABLE IF NOT EXISTS public.item
 (
-    id serial NOT NULL,
-    email character varying(255) NOT NULL,
-    pass_hash character varying(255) NOT NULL,
-    username character varying(255) NOT NULL,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE IF NOT EXISTS public.category
-(
-    id serial NOT NULL,
-    category_name character varying(255) NOT NULL,
-    description text DEFAULT 'Category description goes here',
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE IF NOT EXISTS public.item_details
-(
-    item_id integer NOT NULL,
-    created_by integer NOT NULL,
-    updated_by integer NOT NULL,
+    id integer NOT NULL DEFAULT nextval('item_id_seq'::regclass),
+    sku character varying(255) COLLATE pg_catalog."default",
+    category_id integer DEFAULT 0,
+    item_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    description text COLLATE pg_catalog."default" DEFAULT 'Component description goes here'::text,
+    img_path character varying(255) COLLATE pg_catalog."default",
+    quantity real DEFAULT 0,
+    unit character varying(56) COLLATE pg_catalog."default" DEFAULT 'Individual'::character varying,
+    price money DEFAULT 0,
+    cost money DEFAULT 0,
+    for_sale boolean DEFAULT true,
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     updated_at timestamp with time zone NOT NULL DEFAULT now(),
-    CONSTRAINT unique_item_id UNIQUE (item_id)
-);
-
-CREATE TABLE IF NOT EXISTS public.category_detail
-(
-    category_id integer NOT NULL,
     created_by integer NOT NULL,
     updated_by integer NOT NULL,
-    created_at timestamp with time zone NOT NULL DEFAULT now(),
-    updated_at timestamp with time zone NOT NULL DEFAULT now(),
-    CONSTRAINT unique_category_id UNIQUE (category_id)
+    CONSTRAINT item_pkey PRIMARY KEY (id)
 );
 
-ALTER TABLE IF EXISTS public.item
-    ADD CONSTRAINT category_id FOREIGN KEY (category_id)
-    REFERENCES public.category (id) MATCH SIMPLE
+CREATE TABLE IF NOT EXISTS public.units_user
+(
+    id integer NOT NULL DEFAULT nextval('user_id_seq'::regclass),
+    email character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    pass_hash character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    username character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    signup timestamp with time zone NOT NULL DEFAULT now(),
+    last_login timestamp with time zone NOT NULL DEFAULT now(),
+    CONSTRAINT user_pkey PRIMARY KEY (id),
+    CONSTRAINT email_u UNIQUE (email),
+    CONSTRAINT username_u UNIQUE (username)
+);
+
+ALTER TABLE IF EXISTS public.category
+    ADD CONSTRAINT created_by_fk FOREIGN KEY (created_by)
+    REFERENCES public.units_user (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.component
-    ADD CONSTRAINT parent_id FOREIGN KEY (parent_id)
-    REFERENCES public.item (id) MATCH SIMPLE
+ALTER TABLE IF EXISTS public.category
+    ADD CONSTRAINT updated_by_fk FOREIGN KEY (updated_by)
+    REFERENCES public.units_user (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
@@ -88,49 +79,33 @@ ALTER TABLE IF EXISTS public.component
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.item_details
-    ADD CONSTRAINT created_by FOREIGN KEY (created_by)
-    REFERENCES public."user" (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE IF EXISTS public.item_details
-    ADD CONSTRAINT updated_by FOREIGN KEY (updated_by)
-    REFERENCES public."user" (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE IF EXISTS public.item_details
-    ADD CONSTRAINT item_id FOREIGN KEY (item_id)
+ALTER TABLE IF EXISTS public.component
+    ADD CONSTRAINT parent_id FOREIGN KEY (parent_id)
     REFERENCES public.item (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.category_detail
-    ADD CONSTRAINT created_by FOREIGN KEY (created_by)
-    REFERENCES public."user" (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE IF EXISTS public.category_detail
-    ADD CONSTRAINT updated_by FOREIGN KEY (updated_by)
-    REFERENCES public."user" (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE IF EXISTS public.category_detail
-    ADD CONSTRAINT category_id FOREIGN KEY (category_id)
+ALTER TABLE IF EXISTS public.item
+    ADD CONSTRAINT category_id_fk FOREIGN KEY (category_id)
     REFERENCES public.category (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.item
+    ADD CONSTRAINT created_by_fk FOREIGN KEY (created_by)
+    REFERENCES public.units_user (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.item
+    ADD CONSTRAINT updated_by_fk FOREIGN KEY (updated_by)
+    REFERENCES public.units_user (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
