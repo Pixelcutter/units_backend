@@ -18,7 +18,7 @@ type userService struct {
 func (service *userService) SaveUser(user model.UserDetails) (model.User, error) {
 	newUser, err := service.repository.SaveUser(user)
 	if err != nil {
-		return model.User{}, err
+		return newUser, err
 	}
 
 	return newUser, nil
@@ -27,7 +27,7 @@ func (service *userService) SaveUser(user model.UserDetails) (model.User, error)
 func (service *userService) FetchUser(id int) (model.User, error) {
 	user, err := service.repository.FetchUser(id)
 	if err != nil {
-		return model.User{}, err
+		return user, err
 	}
 	return user, nil
 }

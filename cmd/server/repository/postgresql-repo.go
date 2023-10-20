@@ -2,11 +2,18 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log"
 	"sync"
 
 	"github.com/Pixelcutter/units_backend/cmd/server/model"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+var (
+	UniqueViolation = errors.New("23505")
 )
 
 type postgresRepo struct {
@@ -39,17 +46,6 @@ func NewPostgresRepo(dbPath string) UnitsRepository {
 	return pgInstance
 }
 
-// func CheckForUser(db *pgxpool.Conn, email string, username string) (bool, error) {
-// 	var id int
-// 	query := `SELECT id from units_user WHERE email = $1 OR username = $2`
-// 	err := db.QueryRow(context.Background(), query, email, username).Scan(&id)
-// 	if err == nil {
-// 		return true, nil
-// 	}
-
-// 	return false, err
-// }
-
 func (repository *postgresRepo) SaveUser(user model.UserDetails) (model.User, error) {
 	// Insert into db and return new user
 	query := `
@@ -67,16 +63,16 @@ func (repository *postgresRepo) SaveUser(user model.UserDetails) (model.User, er
 			&newUser.Signup,
 			&newUser.LastLogin,
 		)
-	if err != nil {
+	if err := dbError(err); err != nil {
 		return model.User{}, err
 	}
 
 	return newUser, nil
 }
 
-func (repository *postgresRepo) FindAllUser() ([]model.User, error) {
-	return []model.User{}, nil
-}
+// func (repository *postgresRepo) FindAllUser() ([]model.User, error) {
+// 	return []model.User{}, nil
+// }
 
 func (repository *postgresRepo) FetchUser(id int) (model.User, error) {
 	query := `SELECT id, signup, last_login, email, username FROM units_user WHERE id = $1`
@@ -106,7 +102,53 @@ func (repository *postgresRepo) DeleteUser(id int) error {
 }
 
 func (repository *postgresRepo) SaveItem(item model.NewItem) (model.Item, error) {
-	return model.Item{}, nil
+	query := `
+			 INSERT INTO item
+			 (sku, item_name, description, price, category_id, img_path, cost, for_sale, quantity, created_by, updated_by, unit)
+			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+			 RETURNING *;
+			 `
+	// id, item_name, description, created_at, updated_at, sku, category_id, image_path, quantity, price, for_sale, created_by, updated_by, unit
+	newItem := model.Item{}
+	err := repository.db.QueryRow(
+		context.Background(),
+		query,
+		item.SKU,
+		item.Name,
+		item.Description,
+		item.Price,
+		item.CategoryID,
+		item.ImgPath,
+		item.Cost,
+		item.ForSale,
+		item.Quantity,
+		item.CreatedBy,
+		item.UpdatedBy,
+		item.Unit,
+	).
+		Scan(
+			&newItem.ID,
+			&newItem.SKU,
+			&newItem.CategoryID,
+			&newItem.Name,
+			&newItem.Description,
+			&newItem.ImgPath,
+			&newItem.Quantity,
+			&newItem.Unit,
+			&newItem.Price,
+			&newItem.Cost,
+			&newItem.ForSale,
+			&newItem.CreatedAt,
+			&newItem.UpdatedAt,
+			&newItem.CreatedBy,
+			&newItem.UpdatedBy,
+		)
+	fmt.Println(err)
+	if err := dbError(err); err != nil {
+		return model.Item{}, err
+	}
+
+	return newItem, nil
 }
 
 func (repository *postgresRepo) FindAllItem() ([]model.Item, error) {
@@ -123,4 +165,13 @@ func (repository *postgresRepo) UpdateItem(item model.Item) (model.Item, error) 
 
 func (repository *postgresRepo) DeleteItem(id int) error {
 	return nil
+}
+
+func dbError(err error) error {
+	var pgerr *pgconn.PgError
+	if !errors.As(err, &pgerr) {
+		return nil
+	}
+	fmt.Println(errors.New(pgerr.Code))
+	return errors.New(pgerr.Code)
 }

@@ -5,7 +5,7 @@ import "github.com/Pixelcutter/units_backend/cmd/server/model"
 type UnitsRepository interface {
 	CloseDB()
 	SaveUser(model.UserDetails) (model.User, error)
-	FindAllUser() ([]model.User, error)
+	// FindAllUser() ([]model.User, error)
 	FetchUser(int) (model.User, error)
 	UpdateUser(model.User) (model.User, error)
 	DeleteUser(int) error

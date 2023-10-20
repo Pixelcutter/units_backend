@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/Pixelcutter/units_backend/cmd/server/controller"
@@ -42,19 +41,11 @@ func main() {
 		users.GET("/:id", userController.FetchUser)
 	}
 
-	server.GET("/items", func(ctx *gin.Context) {
-		ctx.JSON(
-			http.StatusOK,
-			itemController.FetchAllItems(),
-		)
-	})
-
-	server.POST("/items", func(ctx *gin.Context) {
-		ctx.JSON(
-			http.StatusCreated,
-			itemController.SaveItem(ctx),
-		)
-	})
+	items := server.Group("items")
+	{
+		items.POST("", itemController.SaveItem)
+		items.GET("/:id", userController.FetchUser)
+	}
 
 	server.Run(fmt.Sprintf(":%v", os.Getenv("PORT")))
 

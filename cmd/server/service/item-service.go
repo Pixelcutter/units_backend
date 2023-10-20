@@ -1,15 +1,12 @@
 package service
 
 import (
-	"math/rand"
-	"time"
-
 	"github.com/Pixelcutter/units_backend/cmd/server/model"
 	"github.com/Pixelcutter/units_backend/cmd/server/repository"
 )
 
 type ItemService interface {
-	SaveItem(model.NewItem) model.Item
+	SaveItem(model.NewItem) (model.Item, error)
 	FetchAllItems() []model.Item
 }
 
@@ -18,15 +15,13 @@ type itemService struct {
 	repository repository.UnitsRepository
 }
 
-func (service *itemService) SaveItem(item model.NewItem) model.Item {
-	newItem := model.Item{
-		ID:          rand.Intn(1000000000),
-		Name:        item.Name,
-		Description: item.Description,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+func (service *itemService) SaveItem(item model.NewItem) (model.Item, error) {
+	newItem, err := service.repository.SaveItem(item)
+	if err != nil {
+		return newItem, err
 	}
-	return newItem
+
+	return newItem, nil
 }
 
 func (service *itemService) FetchAllItems() []model.Item {

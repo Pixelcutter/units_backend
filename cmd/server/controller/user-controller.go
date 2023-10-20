@@ -1,13 +1,14 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/Pixelcutter/units_backend/cmd/server/model"
+	"github.com/Pixelcutter/units_backend/cmd/server/repository"
 	"github.com/Pixelcutter/units_backend/cmd/server/service"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 type UserController interface {
@@ -22,32 +23,38 @@ type user_controller struct {
 func (c *user_controller) FetchUser(ctx *gin.Context) {
 	userId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.String(http.StatusBadRequest, "Invalid user id")
+		ctx.String(http.StatusBadRequest, "invalid request")
+		return
 	}
 
+	// TODO: fix error handling
 	user, err := c.service.FetchUser(userId)
-	if err != nil {
-		fmt.Println(err.Error())
+	switch err {
+	case nil:
+		ctx.JSON(http.StatusOK, user)
+	case pgx.ErrNoRows:
+		ctx.String(http.StatusNotFound, "A user with that id does not exist")
+	default:
+		ctx.String(http.StatusInternalServerError, "Internal server error")
 	}
-
-	ctx.JSON(http.StatusOK, user)
 }
 
 func (c *user_controller) SaveUser(ctx *gin.Context) {
 	var user model.UserDetails
-	ctx.BindJSON(&user)
+	if err := ctx.BindJSON(&user); err != nil {
+		ctx.String(http.StatusBadRequest, "Bad request")
+		return
+	}
+
+	// TODO: fix error handling
 	newUser, err := c.service.SaveUser(user)
-	if err != nil {
-		fmt.Println(err.Error())
-		ctx.JSON(
-			http.StatusBadRequest,
-			gin.H{"error": "Bad Request", "message": err.Error()},
-		)
-	} else {
-		ctx.JSON(
-			http.StatusCreated,
-			newUser,
-		)
+	switch err {
+	case nil:
+		ctx.JSON(http.StatusCreated, newUser)
+	case repository.UniqueViolation:
+		ctx.String(http.StatusBadRequest, "Username and/or email already exists")
+	default:
+		ctx.String(http.StatusInternalServerError, "Internal server error")
 	}
 }
 
