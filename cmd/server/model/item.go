@@ -26,17 +26,21 @@ type Component struct {
 }
 
 type NewItem struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	SKU         string      `json:"sku"`
-	CategoryID  int         `json:"category_id"`
-	ImgPath     string      `json:"img_path"`
-	Quantity    float32     `json:"quantity"`
-	Price       float32     `json:"price"`
-	Cost        float32     `json:"cost"`
-	ForSale     bool        `json:"for_sale"`
-	CreatedBy   int         `json:"created_by"`
-	UpdatedBy   int         `json:"updated_by"`
-	Unit        string      `json:"unit"`
-	Components  []Component `json:"components"`
+	Name        string  `json:"name" binding:"required"`
+	Description string  `json:"description"`
+	SKU         string  `json:"sku"`
+	CategoryID  int     `json:"category_id"`
+	ImgPath     string  `json:"img_path"`
+	Quantity    float32 `json:"quantity"`
+	Price       float32 `json:"price" binding:"required"`
+	Cost        float32 `json:"cost"`
+	ForSale     bool    `json:"for_sale"`
+	CreatedBy   int     `json:"created_by" binding:"required"`
+	UpdatedBy   int     `json:"updated_by" binding:"required"`
+	Unit        string  `json:"unit"`
+}
+
+type NewItemRequest struct {
+	Item           NewItem     `json:"item" binding:"required"`
+	ItemComponents []Component `json:"item_components"`
 }

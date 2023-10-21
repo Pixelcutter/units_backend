@@ -12,8 +12,17 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type DBError struct {
+	Code string
+}
+
+func (e *DBError) Error() string {
+	return fmt.Sprintf("Database Error Code: %v", e.Code)
+}
+
 var (
-	UniqueViolation = errors.New("23505")
+	UniqueViolation = &DBError{"23505"}
+	InternalError   = &DBError{"500"}
 )
 
 type postgresRepo struct {
@@ -104,11 +113,10 @@ func (repository *postgresRepo) DeleteUser(id int) error {
 func (repository *postgresRepo) SaveItem(item model.NewItem) (model.Item, error) {
 	query := `
 			 INSERT INTO item
-			 (sku, item_name, description, price, category_id, img_path, cost, for_sale, quantity, created_by, updated_by, unit)
+			 (sku, item_name, description, price, category_id, img_path, cost, for_sale, quantity, unit, created_by, updated_by)
 			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 			 RETURNING *;
 			 `
-	// id, item_name, description, created_at, updated_at, sku, category_id, image_path, quantity, price, for_sale, created_by, updated_by, unit
 	newItem := model.Item{}
 	err := repository.db.QueryRow(
 		context.Background(),
@@ -122,9 +130,9 @@ func (repository *postgresRepo) SaveItem(item model.NewItem) (model.Item, error)
 		item.Cost,
 		item.ForSale,
 		item.Quantity,
+		item.Unit,
 		item.CreatedBy,
 		item.UpdatedBy,
-		item.Unit,
 	).
 		Scan(
 			&newItem.ID,
@@ -143,7 +151,6 @@ func (repository *postgresRepo) SaveItem(item model.NewItem) (model.Item, error)
 			&newItem.CreatedBy,
 			&newItem.UpdatedBy,
 		)
-	fmt.Println(err)
 	if err := dbError(err); err != nil {
 		return model.Item{}, err
 	}
@@ -172,6 +179,11 @@ func dbError(err error) error {
 	if !errors.As(err, &pgerr) {
 		return nil
 	}
-	fmt.Println(errors.New(pgerr.Code))
-	return errors.New(pgerr.Code)
+
+	switch pgerr.Code {
+	case UniqueViolation.Code:
+		return UniqueViolation
+	default:
+		return InternalError
+	}
 }

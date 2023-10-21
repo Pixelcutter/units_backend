@@ -6,7 +6,7 @@ import (
 )
 
 type ItemService interface {
-	SaveItem(model.NewItem) (model.Item, error)
+	SaveItem(model.NewItemRequest) (model.Item, error)
 	FetchAllItems() []model.Item
 }
 
@@ -15,8 +15,8 @@ type itemService struct {
 	repository repository.UnitsRepository
 }
 
-func (service *itemService) SaveItem(item model.NewItem) (model.Item, error) {
-	newItem, err := service.repository.SaveItem(item)
+func (service *itemService) SaveItem(itemRequest model.NewItemRequest) (model.Item, error) {
+	newItem, err := service.repository.SaveItem(itemRequest.Item)
 	if err != nil {
 		return newItem, err
 	}

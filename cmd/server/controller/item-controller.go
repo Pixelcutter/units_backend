@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Pixelcutter/units_backend/cmd/server/model"
@@ -23,14 +24,15 @@ func (c *item_controller) FetchAllItems() []model.Item {
 }
 
 func (c *item_controller) SaveItem(ctx *gin.Context) {
-	var item model.NewItem
-	if err := ctx.BindJSON(&item); err != nil {
-		ctx.String(http.StatusBadRequest, "Bad request")
+	var itemRequest model.NewItemRequest
+	err := ctx.BindJSON(&itemRequest)
+	if err != nil {
+		fmt.Println(err)
+		ctx.String(http.StatusBadRequest, "ERROR: Missing required fields")
 		return
 	}
 
-	// TODO: Add error handling
-	newItem, err := c.service.SaveItem(item)
+	newItem, err := c.service.SaveItem(itemRequest)
 	switch err {
 	case nil:
 		ctx.JSON(http.StatusCreated, newItem)

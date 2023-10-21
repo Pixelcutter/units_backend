@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -29,6 +30,7 @@ func (c *user_controller) FetchUser(ctx *gin.Context) {
 
 	// TODO: fix error handling
 	user, err := c.service.FetchUser(userId)
+	fmt.Printf("<%s>", err.Error())
 	switch err {
 	case nil:
 		ctx.JSON(http.StatusOK, user)
@@ -48,11 +50,12 @@ func (c *user_controller) SaveUser(ctx *gin.Context) {
 
 	// TODO: fix error handling
 	newUser, err := c.service.SaveUser(user)
+	fmt.Println(err)
 	switch err {
 	case nil:
 		ctx.JSON(http.StatusCreated, newUser)
 	case repository.UniqueViolation:
-		ctx.String(http.StatusBadRequest, "Username and/or email already exists")
+		ctx.String(http.StatusBadRequest, "Username or email already exists")
 	default:
 		ctx.String(http.StatusInternalServerError, "Internal server error")
 	}
