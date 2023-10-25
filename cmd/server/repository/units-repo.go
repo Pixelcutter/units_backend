@@ -10,10 +10,11 @@ type UnitsRepository interface {
 	UpdateUser(model.User) (model.User, error)
 	DeleteUser(int) error
 	SaveItem(model.NewItem) (model.Item, error)
-	FindAllItem() ([]model.Item, error)
-	FindOneItem(int) (model.Item, error)
-	UpdateItem(model.Item) (model.Item, error)
+	FetchAllItems(int) ([]model.DisplayItem, error)
+	FetchOneItem(int) (model.DisplayItem, error)
+	UpdateItem(model.DisplayItem) (model.DisplayItem, error)
 	DeleteItem(int) error
+	SaveComponents([]model.Component, int) ([]model.Component, error)
 	// SaveCategory()
 	// FindAllCategories()
 	// FindOneCategory()

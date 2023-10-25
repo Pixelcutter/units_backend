@@ -6,26 +6,32 @@ import (
 )
 
 type ItemService interface {
-	SaveItem(model.NewItemRequest) (model.Item, error)
-	FetchAllItems() []model.Item
+	SaveItem(model.NewItemRequest) (*model.ItemResponse, error)
+	FetchAllItems(int) ([]model.DisplayItem, error)
 }
 
 type itemService struct {
-	items      []model.Item
 	repository repository.UnitsRepository
 }
 
-func (service *itemService) SaveItem(itemRequest model.NewItemRequest) (model.Item, error) {
+func (service *itemService) SaveItem(itemRequest model.NewItemRequest) (*model.ItemResponse, error) {
 	newItem, err := service.repository.SaveItem(itemRequest.Item)
 	if err != nil {
-		return newItem, err
+		return nil, err
 	}
 
-	return newItem, nil
+	componentList, err := service.repository.SaveComponents(itemRequest.Components, newItem.ID)
+
+	return &model.ItemResponse{Item: newItem, Components: componentList}, nil
 }
 
-func (service *itemService) FetchAllItems() []model.Item {
-	return service.items
+func (service *itemService) FetchAllItems(userID int) ([]model.DisplayItem, error) {
+	items, err := service.repository.FetchAllItems(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }
 
 func NewItemService(repository repository.UnitsRepository) ItemService {

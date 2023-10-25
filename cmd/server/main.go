@@ -41,10 +41,10 @@ func main() {
 		users.GET("/:id", userController.FetchUser)
 	}
 
-	items := server.Group("items")
+	items := server.Group("/:id/items")
 	{
 		items.POST("", itemController.SaveItem)
-		items.GET("/:id", userController.FetchUser)
+		items.GET("", itemController.FetchAllItems)
 	}
 
 	server.Run(fmt.Sprintf(":%v", os.Getenv("PORT")))

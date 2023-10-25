@@ -32,14 +32,15 @@ CREATE TABLE IF NOT EXISTS public.item
     img_path character varying(255) COLLATE pg_catalog."default",
     quantity real DEFAULT 0,
     unit character varying(56) COLLATE pg_catalog."default" DEFAULT 'Individual'::character varying,
-    price money DEFAULT 0,
-    cost money DEFAULT 0,
+    price numeric(12, 2),
+    cost numeric(12, 2) DEFAULT 0,
     for_sale boolean DEFAULT true,
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     updated_at timestamp with time zone NOT NULL DEFAULT now(),
     created_by integer NOT NULL,
     updated_by integer NOT NULL,
-    CONSTRAINT item_pkey PRIMARY KEY (id)
+    CONSTRAINT item_pkey PRIMARY KEY (id),
+    CONSTRAINT user_item_u UNIQUE (item_name, created_by)
 );
 
 CREATE TABLE IF NOT EXISTS public.units_user

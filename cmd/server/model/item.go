@@ -20,11 +20,6 @@ type Item struct {
 	Unit        string    `json:"unit"`
 }
 
-type Component struct {
-	ChildId  int     `json:"child_id"`
-	Quantity float32 `json:"quantity"`
-}
-
 type NewItem struct {
 	Name        string  `json:"name" binding:"required"`
 	Description string  `json:"description"`
@@ -40,7 +35,35 @@ type NewItem struct {
 	Unit        string  `json:"unit"`
 }
 
+type DisplayItem struct {
+	ID          int     `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	CategoryID  int     `json:"category_id"`
+	ImgPath     string  `json:"img_path"`
+	Quantity    float32 `json:"quantity"`
+	Unit        string  `json:"unit"`
+	Price       float32 `json:"price"`
+}
+
+type DisplayComponent struct {
+	ID        int     `json:"id"`
+	Name      string  `json:"name"`
+	Quantity  float32 `json:"quantity"`
+	ImagePath string  `json:"image_path"`
+}
+
+type Component struct {
+	ChildId  int     `json:"child_id"`
+	Quantity float32 `json:"quantity"`
+}
+
 type NewItemRequest struct {
-	Item           NewItem     `json:"item" binding:"required"`
-	ItemComponents []Component `json:"item_components"`
+	Item       NewItem     `json:"item" binding:"required"`
+	Components []Component `json:"item_components"`
+}
+
+type ItemResponse struct {
+	Item       Item        `json:"item"`
+	Components []Component `json:"item_components"`
 }

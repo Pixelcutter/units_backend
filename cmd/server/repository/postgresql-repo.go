@@ -158,20 +158,74 @@ func (repository *postgresRepo) SaveItem(item model.NewItem) (model.Item, error)
 	return newItem, nil
 }
 
-func (repository *postgresRepo) FindAllItem() ([]model.Item, error) {
-	return []model.Item{}, nil
+func (repository *postgresRepo) FetchAllItems(userID int) ([]model.DisplayItem, error) {
+	query := `
+	SELECT id, category_id, item_name, description, img_path, quantity, unit, price
+	FROM item
+	WHERE created_by = $1 AND for_sale = true;
+	`
+
+	rows, err := repository.db.Query(context.Background(), query, userID)
+	if err != nil || rows.Err() != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := []model.DisplayItem{}
+	for rows.Next() {
+		item := model.DisplayItem{}
+		err := rows.Scan(
+			&item.ID,
+			&item.CategoryID,
+			&item.Name,
+			&item.Description,
+			&item.ImgPath,
+			&item.Quantity,
+			&item.Unit,
+			&item.Price,
+		)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	return items, nil
 }
 
-func (repository *postgresRepo) FindOneItem(id int) (model.Item, error) {
-	return model.Item{}, nil
+func (repository *postgresRepo) FetchOneItem(id int) (model.DisplayItem, error) {
+	return model.DisplayItem{}, nil
 }
 
-func (repository *postgresRepo) UpdateItem(item model.Item) (model.Item, error) {
+func (repository *postgresRepo) UpdateItem(item model.DisplayItem) (model.DisplayItem, error) {
 	return item, nil
 }
 
 func (repository *postgresRepo) DeleteItem(id int) error {
 	return nil
+}
+
+func (repository *postgresRepo) SaveComponents(components []model.Component, parentID int) ([]model.Component, error) {
+	query := `
+	INSERT INTO component (parent_id, child_id, quantity)
+	VALUES ($1, $2, $3)
+	RETURNING *;
+	`
+
+	for _, component := range components {
+		_, err := repository.db.Exec(
+			context.Background(),
+			query,
+			parentID,
+			component.ChildId,
+			component.Quantity,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return components, nil
 }
 
 func dbError(err error) error {
