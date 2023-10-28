@@ -160,13 +160,17 @@ func (repository *postgresRepo) SaveItem(item model.NewItem) (model.Item, error)
 
 func (repository *postgresRepo) FetchAllItems(userID int) ([]model.DisplayItem, error) {
 	query := `
-	SELECT id, category_id, item_name, description, img_path, quantity, unit, price
+	SELECT item.id, category_name, item_name, item.description, img_path, quantity, unit, price
 	FROM item
-	WHERE created_by = $1 AND for_sale = true;
+	INNER JOIN category
+	ON item.category_id = category.id
+	WHERE item.created_by = $1 AND category.created_by = $1 AND for_sale = true
+	LIMIT 10;
 	`
 
 	rows, err := repository.db.Query(context.Background(), query, userID)
 	if err != nil || rows.Err() != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -176,7 +180,7 @@ func (repository *postgresRepo) FetchAllItems(userID int) ([]model.DisplayItem, 
 		item := model.DisplayItem{}
 		err := rows.Scan(
 			&item.ID,
-			&item.CategoryID,
+			&item.CategoryName,
 			&item.Name,
 			&item.Description,
 			&item.ImgPath,

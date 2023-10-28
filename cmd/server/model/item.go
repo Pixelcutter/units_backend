@@ -36,14 +36,14 @@ type NewItem struct {
 }
 
 type DisplayItem struct {
-	ID          int     `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	CategoryID  int     `json:"category_id"`
-	ImgPath     string  `json:"img_path"`
-	Quantity    float32 `json:"quantity"`
-	Unit        string  `json:"unit"`
-	Price       float32 `json:"price"`
+	ID           int     `json:"id"`
+	Name         string  `json:"name"`
+	Description  string  `json:"description"`
+	CategoryName string  `json:"category_name"`
+	ImgPath      string  `json:"img_path"`
+	Quantity     float32 `json:"quantity"`
+	Unit         string  `json:"unit"`
+	Price        float32 `json:"price"`
 }
 
 type DisplayComponent struct {
